@@ -4,6 +4,7 @@
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h" 
 #include <ArduinoOTA.h>
+#include <NTPClient.h>
 
 /************************* Conexão WiFi*********************************/
 
@@ -19,19 +20,29 @@
 
 /********************** Variaveis globais *******************************/
 
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "a.st1.ntp.br", -3 * 3600, 60000);
+
 WiFiClient client;
 
 Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
 
 int rele01 = 16; // pino do rele
 int rele02 = 5;
+int horaLigou = NULL;
+int minutoLigou = NULL;
+int tempoLigado = 0;
 
 /****************************** Declaração dos Feeds ***************************************/
 
 /* feed responsavel por receber os dados da nossa dashboard */
+Adafruit_MQTT_Publish IOSub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/grass_io", MQTT_QOS_1);
 
 Adafruit_MQTT_Subscribe IO = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/grass_io", MQTT_QOS_1);
 
+Adafruit_MQTT_Publish OnTimeSub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/OnTimeGrass", MQTT_QOS_1);
+
+Adafruit_MQTT_Subscribe OnTime = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/OnTimeGrass", MQTT_QOS_1);
 
 /* Observe em ambas declarações acima a composição do tópico mqtt
   --> AIO_USERNAME "/feeds/mcp9808"
@@ -55,6 +66,7 @@ void setup() {
   initPins();
   initWiFi();
   initMQTT();
+  timeClient.begin();
 }
 
 void loop() {
@@ -62,7 +74,14 @@ void loop() {
   ArduinoOTA.handle();
   conectar_broker();    
   mqtt.processPackets(5000);
+
+  timeClient.update();
+
+  checkTimeIsUp();
+  OnTimeSub.publish(tempoLigado);
+
   delay(3000);
+  
 }
 
 /*************************** Implementação dos Prototypes ************************************/
@@ -166,6 +185,8 @@ void OTAInit(){
 void initMQTT() {
   IO.setCallback(io_callback);
   mqtt.subscribe(&IO);
+  OnTime.setCallback(OnTime_callback);
+  mqtt.subscribe(&OnTime);
 }
 
 /*************************** Implementação dos Callbacks ************************************/
@@ -183,6 +204,13 @@ void io_callback(char *data, uint16_t len) {
     pumpOff();
   }
 
+}
+
+void OnTime_callback (char *data, uint16_t len){
+  String state = data;
+
+  tempoLigado = atoi(state.c_str());
+  
 }
 
 
@@ -218,9 +246,36 @@ void conectar_broker() {
 void pumpOn(){
   digitalWrite(rele01, LOW);
   digitalWrite(rele02, LOW);
+  saveTime();
+  IOSub.publish("ON");
 }
 
 void pumpOff(){
   digitalWrite(rele01, HIGH);
   digitalWrite(rele02, HIGH);
+  IOSub.publish("OFF");
+}
+
+void saveTime(){
+
+  horaLigou = timeClient.getHours();
+  minutoLigou = timeClient.getMinutes();
+}
+
+void checkTimeIsUp(){
+  int diferencaMinutos = 0;
+  
+  if (horaLigou != NULL && minutoLigou != NULL){
+    
+    if(horaLigou == timeClient.getHours()){
+      diferencaMinutos = timeClient.getMinutes() - minutoLigou;
+    }else if(timeClient.getHours() > horaLigou ){
+      diferencaMinutos = (60 - minutoLigou) + timeClient.getMinutes();
+    }
+   if(diferencaMinutos >= tempoLigado){
+      pumpOff();
+    }
+  }else{
+    pumpOff();
+  }
 }
