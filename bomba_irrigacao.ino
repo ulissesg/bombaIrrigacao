@@ -80,7 +80,7 @@ void loop() {
   checkTimeIsUp();
   OnTimeSub.publish(tempoLigado);
 
-  delay(3000);
+  delay(10000);
   
 }
 
