@@ -15,8 +15,8 @@
 
 #define AIO_SERVER      "io.adafruit.com"
 #define AIO_SERVERPORT  1883
-#define AIO_USERNAME    "ulissesg" // Seu usuario cadastrado na plataforma da Adafruit
-#define AIO_KEY         "daf0fe66e7be4af19b34523241d1a66c"       // Sua key da dashboard
+#define AIO_USERNAME    "ulissesg2" // Seu usuario cadastrado na plataforma da Adafruit
+#define AIO_KEY         "aio_yQTx90BDVJdCpdu3rcGYkaP8gDSK"       // Sua key da dashboard
 
 /********************** Variaveis globais *******************************/
 
@@ -80,7 +80,7 @@ void loop() {
   checkTimeIsUp();
   OnTimeSub.publish(tempoLigado);
 
-  delay(10000);
+  delay(5000);
   
 }
 
@@ -270,7 +270,7 @@ void checkTimeIsUp(){
     if(horaLigou == timeClient.getHours()){
       diferencaMinutos = timeClient.getMinutes() - minutoLigou;
     }else if(timeClient.getHours() > horaLigou ){
-      diferencaMinutos = (60 - minutoLigou) + timeClient.getMinutes();
+      diferencaMinutos = (((timeClient.getHours() - horaLigou)*60) - minutoLigou) + timeClient.getMinutes();
     }
    if(diferencaMinutos >= tempoLigado){
       pumpOff();
