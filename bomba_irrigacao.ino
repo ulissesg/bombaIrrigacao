@@ -16,7 +16,7 @@
 #define AIO_SERVER      "io.adafruit.com"
 #define AIO_SERVERPORT  1883
 #define AIO_USERNAME    "ulissesg2" // Seu usuario cadastrado na plataforma da Adafruit
-#define AIO_KEY         ""       // Sua key da dashboard
+#define AIO_KEY         "aio_WMQk37TvHXgeqbdzLGh1KJA0QEzQ"       // Sua key da dashboard
 
 /********************** Variaveis globais *******************************/
 
@@ -36,9 +36,9 @@ int tempoLigado = 0;
 /****************************** Declaração dos Feeds ***************************************/
 
 /* feed responsavel por receber os dados da nossa dashboard */
-Adafruit_MQTT_Publish IOSub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/grass_io", MQTT_QOS_1);
+Adafruit_MQTT_Publish IOSub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/grass-io", MQTT_QOS_1);
 
-Adafruit_MQTT_Subscribe IO = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/grass_io", MQTT_QOS_1);
+Adafruit_MQTT_Subscribe IO = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/grass-io", MQTT_QOS_1);
 
 Adafruit_MQTT_Publish OnTimeSub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/OnTimeGrass", MQTT_QOS_1);
 
@@ -247,13 +247,11 @@ void pumpOn(){
   digitalWrite(rele01, LOW);
   digitalWrite(rele02, LOW);
   saveTime();
-  IOSub.publish("ON");
 }
 
 void pumpOff(){
   digitalWrite(rele01, HIGH);
   digitalWrite(rele02, HIGH);
-  IOSub.publish("OFF");
 }
 
 void saveTime(){
@@ -274,8 +272,10 @@ void checkTimeIsUp(){
     }
    if(diferencaMinutos >= tempoLigado){
       pumpOff();
+      IOSub.publish("OFF");
     }
   }else{
     pumpOff();
+    IOSub.publish("OFF");
   }
 }
