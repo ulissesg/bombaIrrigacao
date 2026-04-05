@@ -15,8 +15,8 @@
 
 #define AIO_SERVER      "io.adafruit.com"
 #define AIO_SERVERPORT  1883
-#define AIO_USERNAME    "ulissesg2" // Seu usuario cadastrado na plataforma da Adafruit
-#define AIO_KEY         ""       // Sua key da dashboard
+#define AIO_USERNAME    "ulissesg3" // Seu usuario cadastrado na plataforma da Adafruit
+#define AIO_KEY         "aio_HRqr46d1vVDqths49WGsbIPo9GBj"       // Sua key da dashboard
 
 /********************** Variaveis globais *******************************/
 
@@ -40,9 +40,9 @@ Adafruit_MQTT_Publish IOSub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/
 
 Adafruit_MQTT_Subscribe IO = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/grass-io", MQTT_QOS_1);
 
-Adafruit_MQTT_Publish OnTimeSub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/OnTimeGrass", MQTT_QOS_1);
+Adafruit_MQTT_Publish OnTimeSub = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/OnTime", MQTT_QOS_1);
 
-Adafruit_MQTT_Subscribe OnTime = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/OnTimeGrass", MQTT_QOS_1);
+Adafruit_MQTT_Subscribe OnTime = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/OnTime", MQTT_QOS_1);
 
 /* Observe em ambas declarações acima a composição do tópico mqtt
   --> AIO_USERNAME "/feeds/mcp9808"
